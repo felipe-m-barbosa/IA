@@ -244,3 +244,8 @@ labelImgEntrada = Label(FImgs, image=imgEntrada)
 labelImgEntrada.pack(side=LEFT, padx=15, pady=15)
 
 root.mainloop()'''
+
+# Teste para printar o menor caminho utilizando busca em largura.
+caminho = arvore.buscaLargura(arvore)
+print("\nCaminho mais curto: ", end='')
+print(' -> '.join(caminho))
