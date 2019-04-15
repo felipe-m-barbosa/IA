@@ -4,13 +4,13 @@ ROOT = 0
 class Tree:
 
     def __init__(self):
-        self.nodes = [] #obj com os nos
+        self.nodes = [] #vetor com os nos
 
     def nodes(self):
         return self.nodes
 
     def addNode(self, data, id, parent=None):
-        node = Node(data, id)
+        node = Node(data, id, parent)
         self.nodes.append(node)
 
         if(parent is not None):
@@ -41,7 +41,6 @@ class Tree:
             id_estado = antecessor[id_estado]
             contador += 1
         return caminho
-
 
 
 
