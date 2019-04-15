@@ -1,6 +1,11 @@
 from node import Node
 from tree import Tree
 import itertools
+import networkx as nx
+from matplotlib import pyplot as plt
+import matplotlib.patches as mpatches
+from tkinter import *
+from PIL import Image, ImageTk
 import time
 
 ROOT = 0
@@ -74,13 +79,9 @@ def ja_existe(msg, id_pai_atual):
         dado_no_esq = dado_no[0].split() #elementos referentes a margem esquerda
         dado_no_dir = dado_no[1].split() #elementos referentes a margem esquerda
         if((sorted(dado_no_esq) == sorted(msg_arr_esq)) or (sorted(dado_no_dir) == sorted(msg_arr_dir))): #trabalha com os elementos ordenados JA que, para o problema, A B seja igual a B A
-            # se ainda nao bifurcou, ou seja, se um no ainda nao teve pelo menos 2 filhos
-            if(not gemeos):
-                if(i.getId() <= (id_pai_atual)-1) or (i.getId() == 0): #testa se o id do no igual é o inicial ou se esta pelo menos 1 valor atras do atual
-                    return True
-                else:
-                    if (i.getId() < (id_pai_atual) - 1) or (i.getId() == 0): #testa se o id do no atual esta a pelo menos 2 nos de distancia atras do no atual
-                        return True #neste caso, o no nao deve ser recriado por resultaria num loop
+            if(i.getId() <= ((id_pai_atual)-1)) or (i.getId() == 0): #testa se o id do no igual é o inicial ou se esta pelo menos 1 valor atras do atual
+                return True
+
     return False #o no ainda nao existe, ou sua criacao nao resulta em um loop
 
 
@@ -137,7 +138,6 @@ while(id_pai < len(arvore.nodes)):
 
                         if (not ja_existe(msg, id_pai)): #se o no ainda nao existe
                             id = id + 1
-                            num_gerados = num_gerados + 1
                             arvore.addNode(msg, id, id_pai) #cria um novo no
 
     else:
@@ -179,16 +179,15 @@ while(id_pai < len(arvore.nodes)):
 
                             if(not ja_existe(msg, id_pai)): #se o no ainda nao existe
                                 id = id + 1
-                                num_gerados = num_gerados + 1
                                 arvore.addNode(msg, id, id_pai) #cria um novo no
 
-    #verifica se o no atual gerou 2 ou mais filhos
-    if(num_gerados >= 2):
-        gemeos = True
 
     #vai para o proximo no
     id_pai = id_pai + 1
 
+
+for i in arvore.nodes:
+    print(i.getData())
 
 #exibe o grafo gerado
 print("\n\nPrintando grafo")
@@ -201,3 +200,47 @@ for i in arvore.nodes:
         print("Nao tenho papai :(")
     print("Minha informacao eh: ", i.getData())
     print("Meus filhinhos sao: ", i.getChildren())
+
+#Exibindo grafo
+#menor_caminho = ["L B A F|", "L A|F B"]
+
+arestas = []
+for node in arvore.nodes:
+    for child in node.getChildren():
+        arestas.append((node.getData(), arvore.getNode(child).getData()))
+
+nos = [v.getData() for v in arvore.nodes]
+labels = [i for i in range(len(arvore.nodes))]
+
+g = nx.Graph()
+g.add_nodes_from(nos, label=labels)
+g.add_edges_from(arestas)
+#node_colors = ['blue' if n in menor_caminho else 'red' for n in g.nodes()]
+
+green_patch = mpatches.Patch(color='green', label='Menor caminho')
+blue_patch = mpatches.Patch(color='blue', label='Nos nao visitados')
+plt.legend(handles=[green_patch,blue_patch])
+
+pos = nx.spring_layout(g)
+nx.draw(g, with_labels=True, pos=pos, node_size=700)
+
+plt.savefig('grafo1.png')
+plt.show()
+
+#exibir em janela - ta dando pau por enquanto
+'''root = Tk()
+
+root.geometry("1350x620+0+0")
+
+root.title("IA - Travessia do rio")
+
+#Frame superior ********************************
+FImgs = Frame(root, width=900, height=500, bd=1, relief=SUNKEN)
+FImgs.grid(row=0, padx=10, pady=20)
+
+
+imgEntrada = PhotoImage(file="grafo1.png")
+labelImgEntrada = Label(FImgs, image=imgEntrada)
+labelImgEntrada.pack(side=LEFT, padx=15, pady=15)
+
+root.mainloop()'''
