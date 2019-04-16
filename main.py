@@ -9,17 +9,22 @@ from PIL import Image, ImageTk
 import time
 
 ROOT = 0
-#Criando no
-no = Node("L B A F|", 0)
+#comecamos com id(atual) = id)pai = ROOT
+id = ROOT
+id_pai = ROOT
+
+#criando objeto arvore
+arvore = Tree()
+#inserindo o no raiz
+arvore.addNode("F R G S L A|", 0)
 
 #vetor com as restricoes do problema
-restricoes = ["L,B", "B,A"] #Nao pode Lobo com Bode(L,B) e nem Bode com Alface(B,A)
+restricoes = ["R,G", "G,S", "S,L", "L,A"] #Vetor de restrições
+pesos = {'F' : 1, 'A' : 2, 'L' : 3, 'S' : 4, 'G' : 5, 'R' : 6}
+personagens = ['F', 'A', 'L', 'S', 'G', 'R']
 
 #numero de ocupantes do barco
-num_ocupantes_barco = 2
-
-#O sinal de | separa as margens do rio. Entao o vetor margens contem a configuracao das margens esquerda(margens[0]) e direita(margens[1])
-margens = no.getData().split('|') #Dá algo da forma [[F L B],[A]], ou seja, tem os valores das margens direita e esquerda
+num_ocupantes_barco = 3
 
 #Gerando os conjuntos de restricoes
 global restr_sep
@@ -42,28 +47,6 @@ def valida_margem(margem):
 
     return True
 
-#Testa se a configuracao da margem eh valida
-    #Para a margem esquerda        e     Para a margem direita
-#if(testa_margem_valida(margens[0]) and testa_margem_valida(margens[1])):
-    #pode ir para o no
-
-#comecamos com id(atual) = id)pai = ROOT
-id = ROOT
-id_pai = ROOT
-
-#criando objeto arvore
-arvore = Tree()
-#inserindo o no raiz
-arvore.addNode("L B A F|", 0)
-
-'''arvore.addNode("L A|F B", 1)
-arvore.addNode("L A F|B", 2)
-arvore.addNode("L|F A B", 3)
-arvore.addNode("L B F|A", 4)
-arvore.addNode("B|F A L", 5)
-arvore.addNode("F B|A L", 6)
-arvore.addNode("|F B A L", 7)'''
-
 
 #verifica se um no ja existe
 def ja_existe(msg, id_pai_atual):
@@ -83,11 +66,6 @@ def ja_existe(msg, id_pai_atual):
                 return True
 
     return False #o no ainda nao existe, ou sua criacao nao resulta em um loop
-
-
-#inicializa variavel para testar se houve bifurcacao no grafo
-global gemeos
-gemeos = False
 
 #enquanto o id do no atual nao ultrapassar o numero de nos da arvore(caso em que a geracao da arvore deve encerrar, pois o ultimo no foi atingido e nao gerou nenhum filho)
 while(id_pai < len(arvore.getAllNodes())):
@@ -202,11 +180,38 @@ for i in arvore.getAllNodes():
     print("Meus filhinhos sao: ", i.getChildren())
 
 #Exibindo grafo
-
 arestas = []
+#custos = []
+custos_arestas = dict()
+custo = 0
 for node in arvore.getAllNodes():
     for child in node.getChildren():
-        arestas.append((node.getData(), arvore.getNode(child).getData()))
+        quem_viajou = []
+        aresta = (node.getData(), arvore.getNode(child).getData())
+        arestas.append(aresta)
+        margens = node.getData().split('|')
+        margem_dir_pai = margens[0].split()
+        margem_esq_pai = margens[1].split()
+        margens = arvore.getNode(child).getData().split('|')
+        margem_dir_filho = margens[0].split()
+        margem_esq_filho = margens[1].split()
+        if ('F' in margem_dir_pai):
+            quem_viajou = list(set(margem_dir_pai) - set(margem_dir_pai).intersection(set(margem_dir_filho)))
+        else:
+            quem_viajou = list(set(margem_esq_pai) - set(margem_esq_pai).intersection(set(margem_esq_filho)))
+
+        #print('\n', quem_viajou)
+        for ator in personagens:
+            custo = custo + (ator in quem_viajou)*pesos[ator]
+
+        #custos.append(custo)
+        custos_arestas[aresta] = custo
+        custo = 0
+
+'''print('Custos : ', custos)
+custos_arestas = {x:y for x in arestas for y in custos}
+'''
+#print(custos_arestas)
 
 nos = [v.getData() for v in arvore.getAllNodes()]
 #labels = [i for i in range(len(arvore.getAllNodes()))]
@@ -216,14 +221,39 @@ caminho_busca_largura = arvore.buscaLargura(arvore)
 g = nx.Graph()
 g.add_nodes_from(nos)
 g.add_edges_from(arestas)
-node_colors = ['green' if n in caminho_busca_largura else 'blue' for n in g.nodes()]
 
-green_patch = mpatches.Patch(color='green', label='Menor caminho')
+permutacoes_personagens = list(itertools.permutations(personagens, len(personagens)))
+nos_finais = []
+prim = True
+for i in permutacoes_personagens:
+    msg = '|'
+    for aux in i:
+        if(prim):
+            msg = msg + aux
+            prim = False
+        else:
+            msg = msg + ' ' + aux
+    prim = True
+    nos_finais.append(msg)
+'''string_finais = ['|'.join(nos_finais)]
+print(string_finais)'''
+
+#print('Nós finais: ', nos_finais)
+#print('Caminho: ', caminho_busca_largura)
+caminho_sem_no_final = list(set(caminho_busca_largura)-set(caminho_busca_largura).intersection(set(nos_finais))) #caminho sem o no final
+#print('Caminho sem no final: ', caminho_sem_no_final)
+
+#pinta de verde o caminho encontrado pela busca em largura, de vermelho o no final e de azul os demais nos
+node_colors = ['red' if n in nos_finais else 'green' if n in caminho_sem_no_final else 'blue' for n in g.nodes()]
+
+#legenda
+'''green_patch = mpatches.Patch(color='green', label='Menor caminho')
 blue_patch = mpatches.Patch(color='blue', label='Nos nao visitados')
-plt.legend(handles=[green_patch,blue_patch])
+plt.legend(handles=[green_patch,blue_patch])'''
 
-pos = nx.spring_layout(g)
-nx.draw(g, with_labels=True, pos=pos, node_size=700, node_color=node_colors)
+pos = nx.kamada_kawai_layout(g)
+nx.draw(g, pos=pos, node_size=100, node_color=node_colors)
+#nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=custos_arestas)
 
 plt.savefig('grafo1.png')
 plt.show()
