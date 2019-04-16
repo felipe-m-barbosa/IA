@@ -43,6 +43,52 @@ class Tree:
         caminho.reverse()                                               # Reverse para apresentar o caminho da raiz ate o estado final.
         return caminho
 
+    '''def busca_A_estrela(self, arvore):
 
+        raiz = arvore.getNode(0)  # Nó de início
 
+        explorados = []  # Vetor com os nós já explorados
+        em_aberto = []  # Vetor de processo em aberto
+        caminho = []  # Vetor de caminho
+        percorrido = []  # Vetor com a distância já percorrida
+
+        for i in range(len(arvore.getAllNodes())):  # Inicializa as dists percorridas
+            percorrido.append(-1)
+
+        em_aberto.append(raiz)  # Põe a raiz como processo aberto
+        percorrido[raiz.id] = 0  # Dist percorrida da raiz
+
+        # Deepende da definição da heurística!!!
+        # estimado = valor da heuristica de cada nó
+        # for i in range(len(arvore.getAllNodes())):
+        #    estimado.append(-1)
+        # estimado[raiz.id] = valor heurística para a raiz
+
+        while (len(em_aberto)):  # Enquanto houver processo em aberto
+            atual = em_aberto[0]
+
+            for i in range(len(em_aberto)):  # Pega o processo em aberto de menor valor
+                if percorrido[em_aberto[i]] < estimado[atual.id]:
+                    atual = em_aberto[i]
+
+            if atual.getData().split('|')[0] == '':  # Se for um estado final, cheguei na solucao mais curta.
+                return caminho
+
+            em_aberto.pop()  # remove o no da lista de aberto
+            explorados.append(atual)  # coloca como já explorado
+
+            for i in range(0, len(atual.getChildren())):  # para todos os vizinhos do nó atual
+                vizinho = atual.getChildren()[i]
+                if (vizinho in explorados)  # se estiver no explorados, ignora
+                    continue
+                # custo = percorrido[atual.id] + valor heurística #calcula o custo atual
+
+                if (vizinho not in em_aberto):  # se o vizinho não for processo aberto, coloca como aberto
+                    em_aberto.append(vizinho)
+                else if (custo >= percorrido[vizinho.id]):  # se o custo for maior que o valor percorrido do vizinho, ignora
+                    continue
+
+                caminho[vizinho.id] = atual  # coloca o nó atual no caminho do vizinho
+                percorrido[vizinho.id] = custo  # distancia para chegar no vizinho é o custo calculado
+                # estimado[vizinho.id] = percorrido[vizinho.id] + valor_heuristica #valor total estimado para chegar no vizinho'''
 
