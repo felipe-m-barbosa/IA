@@ -74,7 +74,7 @@ def ja_existe(msg, id_pai_atual):
     msg_arr_dir = msg_arr[1].split() #elementos presentes na margem direita
 
     #iterando sobre os nos presentes na arvore para verificar se existe um no que tenha como dado o mesmo valor presente em msg
-    for i in arvore.nodes:
+    for i in arvore.getAllNodes():
         dado_no = i.getData().split('|') #divide a mensagem em margem direita e esquerda por meio do sinal |
         dado_no_esq = dado_no[0].split() #elementos referentes a margem esquerda
         dado_no_dir = dado_no[1].split() #elementos referentes a margem esquerda
@@ -90,7 +90,7 @@ global gemeos
 gemeos = False
 
 #enquanto o id do no atual nao ultrapassar o numero de nos da arvore(caso em que a geracao da arvore deve encerrar, pois o ultimo no foi atingido e nao gerou nenhum filho)
-while(id_pai < len(arvore.nodes)):
+while(id_pai < len(arvore.getAllNodes())):
     num_gerados = 0 #ainda nao gerou nenhum filho
 
     #recupera o no atual
@@ -186,12 +186,12 @@ while(id_pai < len(arvore.nodes)):
     id_pai = id_pai + 1
 
 
-for i in arvore.nodes:
+for i in arvore.getAllNodes():
     print(i.getData())
 
 #exibe o grafo gerado
 print("\n\nPrintando grafo")
-for i in arvore.nodes:
+for i in arvore.getAllNodes():
     print("-----")
     print("[", i.getId(),"]")
     if(not i.getParent() is None):
@@ -202,27 +202,28 @@ for i in arvore.nodes:
     print("Meus filhinhos sao: ", i.getChildren())
 
 #Exibindo grafo
-#menor_caminho = ["L B A F|", "L A|F B"]
 
 arestas = []
-for node in arvore.nodes:
+for node in arvore.getAllNodes():
     for child in node.getChildren():
         arestas.append((node.getData(), arvore.getNode(child).getData()))
 
-nos = [v.getData() for v in arvore.nodes]
-labels = [i for i in range(len(arvore.nodes))]
+nos = [v.getData() for v in arvore.getAllNodes()]
+#labels = [i for i in range(len(arvore.getAllNodes()))]
+
+caminho_busca_largura = arvore.buscaLargura(arvore)
 
 g = nx.Graph()
-g.add_nodes_from(nos, label=labels)
+g.add_nodes_from(nos)
 g.add_edges_from(arestas)
-#node_colors = ['blue' if n in menor_caminho else 'red' for n in g.nodes()]
+node_colors = ['green' if n in caminho_busca_largura else 'blue' for n in g.nodes()]
 
 green_patch = mpatches.Patch(color='green', label='Menor caminho')
 blue_patch = mpatches.Patch(color='blue', label='Nos nao visitados')
 plt.legend(handles=[green_patch,blue_patch])
 
 pos = nx.spring_layout(g)
-nx.draw(g, with_labels=True, pos=pos, node_size=700)
+nx.draw(g, with_labels=True, pos=pos, node_size=700, node_color=node_colors)
 
 plt.savefig('grafo1.png')
 plt.show()
@@ -246,6 +247,6 @@ labelImgEntrada.pack(side=LEFT, padx=15, pady=15)
 root.mainloop()'''
 
 # Teste para printar o menor caminho utilizando busca em largura.
-caminho = arvore.buscaLargura(arvore)
-print("\nCaminho mais curto: ", end='')
-print(' -> '.join(caminho))
+'''caminho = arvore.buscaLargura(arvore)
+print("\nCaminho mais curto: ")
+print(' -> '.join(caminho))'''
