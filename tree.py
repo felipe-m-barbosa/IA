@@ -24,23 +24,23 @@ class Tree:
         id_estado_final = -1
         for i in range(len(arvore.getAllNodes())):
             antecessor.append(-1)
-        fila.append(arvore.getNode(0))                                  # Primeiro coloca a raiz na fila.
+        fila.append(arvore.getNode(0))  # Primeiro coloca a raiz na fila.
         while len(fila):
             noAtual = fila.pop(0)
             for i in range(0, len(noAtual.getChildren())):
-                antecessor[noAtual.getChildren()[i]] = noAtual.id      # Colo o id do filho na posicao referente ao no pai.
+                antecessor[noAtual.getChildren()[i]] = noAtual.id  # Colo o id do filho na posicao referente ao no pai.
                 fila.append(arvore.getNode(noAtual.getChildren()[i]))  # Coloco o no do filho na fila.
-            if noAtual.getData().split('|')[0] == '':                  # Se for um estado final, cheguei na solucao mais curta.
+            if noAtual.getData().split('|')[0] == '':  # Se for um estado final, cheguei na solucao mais curta.
                 id_estado_final = noAtual.id
                 break
-        caminho = [id_estado_final]                                     # O caminho comeca a partir do estado final
-        while antecessor[id_estado_final] is not -1:                    # Enquanto o pai nao for -1
-            caminho.append(antecessor[id_estado_final])                 # Insiro o pai no caminho
-            id_estado_final = antecessor[id_estado_final]               # Atualizo a variavel, agora ela passa a ser o pai.
-        for i in range(0, len(caminho)):                                # For para mudar os ids para os dados dentro do no.
+        caminho = [id_estado_final]  # O caminho comeca a partir do estado final
+        while antecessor[id_estado_final] is not -1:  # Enquanto o pai nao for -1
+            caminho.append(antecessor[id_estado_final])  # Insiro o pai no caminho
+            id_estado_final = antecessor[id_estado_final]  # Atualizo a variavel, agora ela passa a ser o pai.
+        for i in range(0, len(caminho)):  # For para mudar os ids para os dados dentro do no.
             id_aux = caminho[i]
             caminho[i] = arvore.getNode(id_aux).getData()
-        caminho.reverse()                                               # Reverse para apresentar o caminho da raiz ate o estado final.
+        caminho.reverse()  # Reverse para apresentar o caminho da raiz ate o estado final.
         return caminho
 
     '''def busca_A_estrela(self, arvore):
