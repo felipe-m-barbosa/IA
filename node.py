@@ -21,7 +21,7 @@ class Node:
     def getChildren(self):      # Retorna os filhos do no.
         return self.children
 
-    def addChild(self, data, peso_filho):   # Adiciona um filho ao vetor de no.
+    def addChild(self, data, peso_filho=None):   # Adiciona um filho ao vetor de no.
         self.children.append(data)
         self.pesos_para_filhos.append(peso_filho)
         return

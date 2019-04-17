@@ -239,8 +239,10 @@ def converteDicToList(dicionario):
                 break
     return lista
 
+
+vet_dist_estado_final = converteDicToList(dicionario_heuristica)
 print("Teste de conversão: ")
-print(converteDicToList(dicionario_heuristica))
+print(vet_dist_estado_final)
 
 
 for i in arvore.getAllNodes():
@@ -266,7 +268,12 @@ custos_arestas = {x:y for x in arestas for y in custos}
 #print(custos_arestas)
 
 caminho_busca_largura = arvore.buscaLargura(arvore)
+print("\n\nResultado da busca em largura: ", caminho_busca_largura)
 
+caminho_busca_a_estrela = arvore.busca_A_estrela(arvore, vet_dist_estado_final)
+print("\n\nResultado da busca A*: ")
+for aux in caminho_busca_a_estrela:
+    print("-> ", aux.getData())
 
 #Parte de exibição **********************************************
 

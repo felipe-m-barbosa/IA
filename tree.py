@@ -8,12 +8,12 @@ class Tree:
     def getAllNodes(self):
         return self.nodes
 
-    def addNode(self, data, id, parent=None):
+    def addNode(self, data, id, peso_filho=None, parent=None):
         node = Node(data, id, parent)
         self.nodes.append(node)
 
         if(parent is not None):
-            self.nodes[parent].addChild(id)
+            self.nodes[parent].addChild(id, peso_filho)
 
     def getNode(self, id):
         return self.nodes[id]
@@ -57,7 +57,7 @@ class Tree:
     def busca_A_estrela(self, arvore, vet_dist_estado_final):
 
         # Vetor com os processos que estao aberto no momento, este vetor ira gerar o caminho no final.
-        vet_processo_aberto = []
+        vet_processo_aberto = [] #eh um vetor de nos
 
         raiz = arvore.getNode(0)
         vet_processo_aberto.append(raiz)  # Insere a raiz no vetor como primeiro no em aberto.
@@ -89,19 +89,21 @@ class Tree:
 
             # Somo as distancias (pesos) para o estado inicial
             for i in range(len(no_atual.getChildren())):
-                vet_dist_estado_inicial[no_atual.getChildren()[i].getId()] += no_atual.getPesosParaOsFilhos()[i]
+                vet_dist_estado_inicial[no_atual.getChildren()[i]] += no_atual.getPesosParaOsFilhos()[i]
 
             # Agora iremos procurar a menor funcao de avaliacao (g + h) entre os filhos do no.
             # Comeco selecionando o primeiro filho como ideal
-            id_filho_selecionado = no_atual.getChildren()[0].getId()
+            id_filho_selecionado = no_atual.getChildren()[0]
             custo_avaliacao = vet_dist_estado_inicial[id_filho_selecionado] + vet_dist_estado_final[id_filho_selecionado]
 
             # Se existir mais filhos, comparo para ver qual que possui a menor funcao de avaliacao.
             if len(no_atual.getChildren()) > 1:
                 for child in range(len(no_atual.getChildren()) - 1):
-                    id_prox_filho = no_atual.getChildren()[child + 1].getId()
+                    id_prox_filho = no_atual.getChildren()[child + 1]
                     custo_avaliacao_prox = vet_dist_estado_inicial[id_prox_filho] + vet_dist_estado_final[id_prox_filho]
                     if custo_avaliacao_prox < custo_avaliacao:
+                        #coloca o filho atual em espera
+                        vet_proc_espera[id_filho_selecionado] = custo_avaliacao
                         custo_avaliacao = custo_avaliacao_prox
                         id_filho_selecionado = id_prox_filho
                     # Se nao for selecionado, o no sera colocado em espera
@@ -139,7 +141,7 @@ class Tree:
                 break
 
             # Verifico se o pai esta presente como um processo que foi aberto
-            id_pai_no_atual = no_atual.getParent().getId()
+            id_pai_no_atual = no_atual.getParent()
             for father in range(len(vet_processo_aberto)):
                 if vet_processo_aberto[father].getId() == id_pai_no_atual:
                     no_atual = vet_processo_aberto[father]
@@ -147,7 +149,6 @@ class Tree:
                     break
 
         return caminho
-
 
 
 
