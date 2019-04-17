@@ -1,8 +1,8 @@
-from node import Node
 from tree import Tree
 import itertools
 import networkx as nx
 from matplotlib import pyplot as plt
+import numpy as np
 import matplotlib.patches as mpatches
 from tkinter import *
 from PIL import Image, ImageTk
@@ -15,16 +15,40 @@ id_pai = ROOT
 
 #criando objeto arvore
 arvore = Tree()
+
+dicionario_heuristica = {
+    'A B F L|': 22,
+    'A L|B F': 18,
+    'A F L|B': 17,
+    'L|A B F': 14,
+    'A|B F L': 12,
+    'B F L|A': 10,
+    'A B F|L': 8,
+    'B|A F L': 5,
+    'B F|A L': 4,
+    '|A B F L': 0
+}
+
+arvore.addNode("A B F L|", 0)
+
+#vetor com as restricoes do problema
+restricoes = ["L,B", "B,A"] #Vetor de restrições
+pesos = {'F' : 1, 'A' : 2, 'B' : 3, 'L' : 4}
+global personagens
+personagens = ['F', 'L', 'B', 'A']
+num_ocupantes_barco = 2
+
 #inserindo o no raiz
-arvore.addNode("F R G S L A|", 0)
+'''arvore.addNode("F R G S L A|", 0)
 
 #vetor com as restricoes do problema
 restricoes = ["R,G", "G,S", "S,L", "L,A"] #Vetor de restrições
 pesos = {'F' : 1, 'A' : 2, 'L' : 3, 'S' : 4, 'G' : 5, 'R' : 6}
+global personagens
 personagens = ['F', 'A', 'L', 'S', 'G', 'R']
 
 #numero de ocupantes do barco
-num_ocupantes_barco = 3
+num_ocupantes_barco = 3'''
 
 #Gerando os conjuntos de restricoes
 global restr_sep
@@ -67,6 +91,31 @@ def ja_existe(msg, id_pai_atual):
 
     return False #o no ainda nao existe, ou sua criacao nao resulta em um loop
 
+def calcula_custo(estado_pai, estado_filho):
+    custo = 0
+    quem_viajou = []
+    margens_pai = estado_pai.split('|')
+    margem_dir_pai = margens_pai[0].split()
+    margem_esq_pai = margens_pai[1].split()
+    margens_filho = estado_filho.split('|')
+    margem_dir_filho = margens_filho[0].split()
+    margem_esq_filho = margens_filho[1].split()
+    if ('F' in margem_dir_pai):
+        quem_viajou = list(set(margem_dir_pai) - set(margem_dir_pai).intersection(set(margem_dir_filho)))
+    else:
+        quem_viajou = list(set(margem_esq_pai) - set(margem_esq_pai).intersection(set(margem_esq_filho)))
+
+    # print('\n', quem_viajou)
+    for ator in personagens:
+        custo = custo + (ator in quem_viajou) * pesos[ator]
+
+    return custo
+
+
+arestas = []
+
+custos_arestas = dict()
+custo_transicao = 0
 #enquanto o id do no atual nao ultrapassar o numero de nos da arvore(caso em que a geracao da arvore deve encerrar, pois o ultimo no foi atingido e nao gerou nenhum filho)
 while(id_pai < len(arvore.getAllNodes())):
     num_gerados = 0 #ainda nao gerou nenhum filho
@@ -96,6 +145,7 @@ while(id_pai < len(arvore.getAllNodes())):
 
                         #constroi a mensagem referente ao estado do no, na forma: margem_esquerda|margem_direita
                         if(len(margem_esq_resultante)):
+                            margem_esq_resultante = sorted(margem_esq_resultante)
                             msg = margem_esq_resultante[0]
 
                             for i in range(1,len(margem_esq_resultante)):
@@ -107,6 +157,7 @@ while(id_pai < len(arvore.getAllNodes())):
                         margem_dir_resultante = list(set(margem_dir).union(set(barco))) #a margem direita apos a chegada dos ocupantes do barco
 
                         if(len(margem_dir_resultante)):
+                            margem_dir_resultante = sorted(margem_dir_resultante)
                             msg = msg + margem_dir_resultante[0]
 
                             for i in range(1,len(margem_dir_resultante)):
@@ -116,7 +167,13 @@ while(id_pai < len(arvore.getAllNodes())):
 
                         if (not ja_existe(msg, id_pai)): #se o no ainda nao existe
                             id = id + 1
-                            arvore.addNode(msg, id, id_pai) #cria um novo no
+                            aresta = (arvore.getNode(id_pai).getData(), msg)
+                            arestas.append(aresta)
+
+                            custo_transicao = calcula_custo(arvore.getNode(id_pai).getData(), msg)
+                            custos_arestas[aresta] = custo_transicao
+
+                            arvore.addNode(msg, id, custo_transicao, id_pai) #cria um novo no
 
     else:
         # se o fazendeiro esta na margem esquerda, o barco saira dela
@@ -138,6 +195,7 @@ while(id_pai < len(arvore.getAllNodes())):
 
                             # constroi a mensagem referente ao estado do no, na forma: margem_esquerda|margem_direita
                             if (len(margem_esq_resultante)):
+                                margem_esq_resultante = sorted(margem_esq_resultante)
                                 msg = margem_esq_resultante[0]
 
                                 for i in range(1, len(margem_esq_resultante)):
@@ -148,6 +206,7 @@ while(id_pai < len(arvore.getAllNodes())):
                             msg = msg + '|'
 
                             if (len(margem_dir_resultante)):
+                                margem_dir_resultante = sorted(margem_dir_resultante)
                                 msg = msg + margem_dir_resultante[0]
 
                                 for i in range(1, len(margem_dir_resultante)):
@@ -157,11 +216,31 @@ while(id_pai < len(arvore.getAllNodes())):
 
                             if(not ja_existe(msg, id_pai)): #se o no ainda nao existe
                                 id = id + 1
-                                arvore.addNode(msg, id, id_pai) #cria um novo no
 
+                                aresta = (arvore.getNode(id_pai).getData(), msg)
+                                arestas.append(aresta)
+
+                                custo_transicao = calcula_custo(arvore.getNode(id_pai).getData(), msg)
+                                custos_arestas[aresta] = custo_transicao
+
+                                arvore.addNode(msg, id, custo_transicao, id_pai) #cria um novo no
 
     #vai para o proximo no
     id_pai = id_pai + 1
+
+
+def converteDicToList(dicionario):
+    num_nos = len(arvore.getAllNodes())
+    lista = np.zeros(num_nos)
+    for no in arvore.getAllNodes():
+        for chave in dicionario:
+            if chave == no.getData():
+                lista[no.getId()] = dicionario[chave]
+                break
+    return lista
+
+print("Teste de conversão: ")
+print(converteDicToList(dicionario_heuristica))
 
 
 for i in arvore.getAllNodes():
@@ -178,45 +257,21 @@ for i in arvore.getAllNodes():
         print("Nao tenho papai :(")
     print("Minha informacao eh: ", i.getData())
     print("Meus filhinhos sao: ", i.getChildren())
+    print("Os peso pra ir nos meus filhinhos são: ", i.getPesosParaOsFilhos())
 
-#Exibindo grafo
-arestas = []
-#custos = []
-custos_arestas = dict()
-custo = 0
-for node in arvore.getAllNodes():
-    for child in node.getChildren():
-        quem_viajou = []
-        aresta = (node.getData(), arvore.getNode(child).getData())
-        arestas.append(aresta)
-        margens = node.getData().split('|')
-        margem_dir_pai = margens[0].split()
-        margem_esq_pai = margens[1].split()
-        margens = arvore.getNode(child).getData().split('|')
-        margem_dir_filho = margens[0].split()
-        margem_esq_filho = margens[1].split()
-        if ('F' in margem_dir_pai):
-            quem_viajou = list(set(margem_dir_pai) - set(margem_dir_pai).intersection(set(margem_dir_filho)))
-        else:
-            quem_viajou = list(set(margem_esq_pai) - set(margem_esq_pai).intersection(set(margem_esq_filho)))
-
-        #print('\n', quem_viajou)
-        for ator in personagens:
-            custo = custo + (ator in quem_viajou)*pesos[ator]
-
-        #custos.append(custo)
-        custos_arestas[aresta] = custo
-        custo = 0
 
 '''print('Custos : ', custos)
 custos_arestas = {x:y for x in arestas for y in custos}
 '''
 #print(custos_arestas)
 
+caminho_busca_largura = arvore.buscaLargura(arvore)
+
+
+#Parte de exibição **********************************************
+
 nos = [v.getData() for v in arvore.getAllNodes()]
 #labels = [i for i in range(len(arvore.getAllNodes()))]
-
-caminho_busca_largura = arvore.buscaLargura(arvore)
 
 g = nx.Graph()
 g.add_nodes_from(nos)
@@ -240,23 +295,25 @@ print(string_finais)'''
 
 #print('Nós finais: ', nos_finais)
 #print('Caminho: ', caminho_busca_largura)
-caminho_sem_no_final = list(set(caminho_busca_largura)-set(caminho_busca_largura).intersection(set(nos_finais))) #caminho sem o no final
+caminho_sem_no_final_e_sem_no_inicial = list(set(caminho_busca_largura)-set(caminho_busca_largura).intersection(set(nos_finais))-set('A B F L|')) #caminho sem o no final
 #print('Caminho sem no final: ', caminho_sem_no_final)
 
 #pinta de verde o caminho encontrado pela busca em largura, de vermelho o no final e de azul os demais nos
-node_colors = ['red' if n in nos_finais else 'green' if n in caminho_sem_no_final else 'blue' for n in g.nodes()]
+node_colors = ['purple' if n == 'A B F L|' else 'yellow' if n in nos_finais else 'green' if n in caminho_sem_no_final_e_sem_no_inicial else 'blue' for n in g.nodes()]
 
 #legenda
 '''green_patch = mpatches.Patch(color='green', label='Menor caminho')
 blue_patch = mpatches.Patch(color='blue', label='Nos nao visitados')
 plt.legend(handles=[green_patch,blue_patch])'''
 
-pos = nx.kamada_kawai_layout(g)
-nx.draw(g, pos=pos, node_size=100, node_color=node_colors)
-#nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=custos_arestas)
+#pos = nx.kamada_kawai_layout(g)
+pos = nx.spring_layout(g)
+nx.draw(g, pos=pos, with_labels=True, node_size=700, node_color=node_colors)
+nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=custos_arestas)
 
 plt.savefig('grafo1.png')
 plt.show()
+
 
 #exibir em janela - ta dando pau por enquanto
 '''root = Tk()
