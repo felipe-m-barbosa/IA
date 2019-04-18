@@ -31,20 +31,20 @@ id_pai = ROOT
 arvore = Tree()
 
 #adicionando no raiz
-arvore.addNode("A B F L|", 0)
+arvore.addNode("C F G Q R|", 0)
 
 #vetor com as restricoes do problema
-restricoes = ["L,B", "B,A"] #Vetor de restrições
+restricoes = ["C,G", "G,R", "R,Q"] #Vetor de restrições
 
 #vetor com os pesos referentes ao transporte de cada personagem
-pesos = {'F' : 1, 'A' : 2, 'B' : 3, 'L' : 4}
+pesos = {'F' : 1, 'Q' : 2, 'R' : 3, 'G' : 4, 'C' : 5}
 
 #vetor de personagens
 global personagens
-personagens = ['F', 'L', 'B', 'A']
+personagens = ['F', 'C', 'G', 'R', 'Q']
 
 #capacidade do barco
-num_ocupantes_barco = 2
+num_ocupantes_barco = 3
 
 
 #Gerando os conjuntos de restricoes
@@ -238,22 +238,31 @@ for i in arvore.getAllNodes():
     print(i.getData())
 
 #exibe o grafo gerado
+f = open("grafo.txt","w+")
 print("\n\nPrintando grafo")
 for i in arvore.getAllNodes():
+    f.write("-----\n")
     print("-----")
+    f.write("[" + str(i.getId()) + "]\n")
     print("[", i.getId(),"]")
     if(not i.getParent() is None):
-        print("Meu papai eh: ", i.getParent())
+        f.write("Meu papai eh: " + str(i.getParent()) + "\n")
+        print("Meu papai eh: " + str(i.getParent()))
     else:
+        f.write("Nao tenho papai :(\n")
         print("Nao tenho papai :(")
+    f.write("Minha informacao eh: " + str(i.getData()) + "\n")
     print("Minha informacao eh: ", i.getData())
+    f.write("Meus filhinhos sao: " + str(i.getChildren()) + "\n")
     print("Meus filhinhos sao: ", i.getChildren())
+    f.write("Os peso pra ir nos meus filhinhos são: " + str(i.getPesosParaOsFilhos()) + "\n\n")
     print("Os peso pra ir nos meus filhinhos são: ", i.getPesosParaOsFilhos())
 
+f.close()
 
 caminho_busca_largura = arvore.buscaLargura(arvore)
 
-caminho_busca_a_estrela = arvore.busca_A_estrela(arvore, vet_dist_estado_final)
+#caminho_busca_a_estrela = arvore.busca_A_estrela(arvore, vet_dist_estado_final)
 
 
 #Parte de exibição **********************************************
@@ -283,7 +292,7 @@ caminho_sem_no_final_e_sem_no_inicial = list(set(caminho_busca_largura)-set(cami
 
 
 #pinta de verde o caminho encontrado pela busca em largura, de vermelho o no final e de azul os demais nos
-node_colors = ['purple' if n == 'A B F L|' else 'yellow' if n in nos_finais else 'green' if n in caminho_sem_no_final_e_sem_no_inicial else 'blue' for n in g.nodes()]
+node_colors = ['purple' if n == 'C F G Q R|' else 'yellow' if n in nos_finais else 'green' if n in caminho_sem_no_final_e_sem_no_inicial else 'blue' for n in g.nodes()]
 
 #legenda
 '''green_patch = mpatches.Patch(color='green', label='Menor caminho')
@@ -296,7 +305,8 @@ nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=custos_arestas)
 
 plt.savefig('grafo1.png')
 
-plt.show()
+plt.show(block=False)
+plt.close()
 
 
 #exibir em janela
@@ -363,8 +373,8 @@ FResultadoBuscaAEstrela.grid(row=0, column=2, padx=15)
 Label(FResultadoBuscaAEstrela, text='Resultado Busca A*', justify=CENTER).grid(row=0, pady=10, sticky=W)
 
 i=1
-for no in caminho_busca_a_estrela:
+'''for no in caminho_busca_a_estrela:
     Label(FResultadoBuscaAEstrela, text=no.getData(), justify=CENTER).grid(row=i, pady=10)
     i+=1
-
+'''
 root.mainloop()
