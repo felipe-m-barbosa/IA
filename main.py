@@ -9,12 +9,6 @@ from PIL import Image, ImageTk
 import time
 
 ROOT = 0
-#comecamos com id(atual) = id)pai = ROOT
-id = ROOT
-id_pai = ROOT
-
-#criando objeto arvore
-arvore = Tree()
 
 dicionario_heuristica = {
     'A B F L|': 22,
@@ -29,26 +23,29 @@ dicionario_heuristica = {
     '|A B F L': 0
 }
 
+#comecamos com id(atual) = id)pai = ROOT
+id = ROOT
+id_pai = ROOT
+
+#criando objeto arvore
+arvore = Tree()
+
+#adicionando no raiz
 arvore.addNode("A B F L|", 0)
 
 #vetor com as restricoes do problema
 restricoes = ["L,B", "B,A"] #Vetor de restrições
+
+#vetor com os pesos referentes ao transporte de cada personagem
 pesos = {'F' : 1, 'A' : 2, 'B' : 3, 'L' : 4}
+
+#vetor de personagens
 global personagens
 personagens = ['F', 'L', 'B', 'A']
+
+#capacidade do barco
 num_ocupantes_barco = 2
 
-#inserindo o no raiz
-'''arvore.addNode("F R G S L A|", 0)
-
-#vetor com as restricoes do problema
-restricoes = ["R,G", "G,S", "S,L", "L,A"] #Vetor de restrições
-pesos = {'F' : 1, 'A' : 2, 'L' : 3, 'S' : 4, 'G' : 5, 'R' : 6}
-global personagens
-personagens = ['F', 'A', 'L', 'S', 'G', 'R']
-
-#numero de ocupantes do barco
-num_ocupantes_barco = 3'''
 
 #Gerando os conjuntos de restricoes
 global restr_sep
@@ -62,13 +59,9 @@ def valida_margem(margem):
 
         for i in combinacoes:   #passando por todas as combinacoes, 2 a 2, dos elementos da margem
             for j in restr_sep: #passando pelas restricoes
-                '''print(set(i) == set(j))
-                print(set(i), " == ", set(j))'''
-
                 if (set(i) == set(j)): #comparando se as combinacoes batem com alguma das restricoes -> movimento invalido
 
                     return False
-
     return True
 
 
@@ -105,7 +98,6 @@ def calcula_custo(estado_pai, estado_filho):
     else:
         quem_viajou = list(set(margem_esq_pai) - set(margem_esq_pai).intersection(set(margem_esq_filho)))
 
-    # print('\n', quem_viajou)
     for ator in personagens:
         custo = custo + (ator in quem_viajou) * pesos[ator]
 
@@ -241,9 +233,6 @@ def converteDicToList(dicionario):
 
 
 vet_dist_estado_final = converteDicToList(dicionario_heuristica)
-print("Teste de conversão: ")
-print(vet_dist_estado_final)
-
 
 for i in arvore.getAllNodes():
     print(i.getData())
@@ -262,23 +251,14 @@ for i in arvore.getAllNodes():
     print("Os peso pra ir nos meus filhinhos são: ", i.getPesosParaOsFilhos())
 
 
-'''print('Custos : ', custos)
-custos_arestas = {x:y for x in arestas for y in custos}
-'''
-#print(custos_arestas)
-
 caminho_busca_largura = arvore.buscaLargura(arvore)
-print("\n\nResultado da busca em largura: ", caminho_busca_largura)
 
 caminho_busca_a_estrela = arvore.busca_A_estrela(arvore, vet_dist_estado_final)
-print("\n\nResultado da busca A*: ")
-for aux in caminho_busca_a_estrela:
-    print("-> ", aux.getData())
+
 
 #Parte de exibição **********************************************
 
 nos = [v.getData() for v in arvore.getAllNodes()]
-#labels = [i for i in range(len(arvore.getAllNodes()))]
 
 g = nx.Graph()
 g.add_nodes_from(nos)
@@ -297,13 +277,10 @@ for i in permutacoes_personagens:
             msg = msg + ' ' + aux
     prim = True
     nos_finais.append(msg)
-'''string_finais = ['|'.join(nos_finais)]
-print(string_finais)'''
 
-#print('Nós finais: ', nos_finais)
-#print('Caminho: ', caminho_busca_largura)
+
 caminho_sem_no_final_e_sem_no_inicial = list(set(caminho_busca_largura)-set(caminho_busca_largura).intersection(set(nos_finais))-set('A B F L|')) #caminho sem o no final
-#print('Caminho sem no final: ', caminho_sem_no_final)
+
 
 #pinta de verde o caminho encontrado pela busca em largura, de vermelho o no final e de azul os demais nos
 node_colors = ['purple' if n == 'A B F L|' else 'yellow' if n in nos_finais else 'green' if n in caminho_sem_no_final_e_sem_no_inicial else 'blue' for n in g.nodes()]
@@ -313,34 +290,81 @@ node_colors = ['purple' if n == 'A B F L|' else 'yellow' if n in nos_finais else
 blue_patch = mpatches.Patch(color='blue', label='Nos nao visitados')
 plt.legend(handles=[green_patch,blue_patch])'''
 
-#pos = nx.kamada_kawai_layout(g)
 pos = nx.spring_layout(g)
 nx.draw(g, pos=pos, with_labels=True, node_size=700, node_color=node_colors)
 nx.draw_networkx_edge_labels(g, pos=pos, edge_labels=custos_arestas)
 
 plt.savefig('grafo1.png')
+
 plt.show()
 
 
-#exibir em janela - ta dando pau por enquanto
-'''root = Tk()
+#exibir em janela
+root = Tk()
 
-root.geometry("1350x620+0+0")
+root.geometry("1000x620+0+0")
 
 root.title("IA - Travessia do rio")
 
 #Frame superior ********************************
-FImgs = Frame(root, width=900, height=500, bd=1, relief=SUNKEN)
-FImgs.grid(row=0, padx=10, pady=20)
+FImgs = Frame(root, width=700, height=500, bd=1, relief=SUNKEN)
+FImgs.grid(row=0, padx=10, pady=15)
 
 
 imgEntrada = PhotoImage(file="grafo1.png")
 labelImgEntrada = Label(FImgs, image=imgEntrada)
 labelImgEntrada.pack(side=LEFT, padx=15, pady=15)
 
-root.mainloop()'''
+FLegenda = Frame(root, width=700, height=60, bd=1, relief=SUNKEN)
+FLegenda.grid(row=1)
 
-# Teste para printar o menor caminho utilizando busca em largura.
-'''caminho = arvore.buscaLargura(arvore)
-print("\nCaminho mais curto: ")
-print(' -> '.join(caminho))'''
+canvas = Canvas(FLegenda, width=50, height=50)
+canvas.pack(side=LEFT)
+
+greenCircle = canvas.create_oval(10, 10, 40, 40, fill="green")
+
+Label(FLegenda, text="Caminho resultante").pack(side=LEFT)
+
+canvas = Canvas(FLegenda, width=50, height=50)
+canvas.pack(side=LEFT, padx=10)
+
+purpleCircle = canvas.create_oval(10, 10, 40, 40, fill="purple")
+
+Label(FLegenda, text="Estado inicial").pack(side=LEFT)
+
+canvas = Canvas(FLegenda, width=50, height=50)
+canvas.pack(side=LEFT, padx=10)
+
+yellowCircle = canvas.create_oval(10, 10, 40, 40, fill="yellow")
+
+Label(FLegenda, text="Estado final").pack(side=LEFT)
+
+canvas = Canvas(FLegenda, width=50, height=50)
+canvas.pack(side=LEFT, padx=10)
+
+blueCircle = canvas.create_oval(10, 10, 40, 40, fill="blue")
+
+Label(FLegenda, text="Estado do grafo").pack(side=LEFT)
+
+FResultadoBuscaLargura = Frame(root, width=300, height=500, bd=1, relief=SUNKEN)
+FResultadoBuscaLargura.grid(row=0, column=1)
+
+Label(FResultadoBuscaLargura, text='Resultado Busca em Largura', justify=CENTER).grid(row=0, pady=10, sticky=W)
+
+i=1
+for estado in caminho_busca_largura:
+    Label(FResultadoBuscaLargura, text=estado, justify=CENTER).grid(row=i, pady=10)
+    i+=1
+
+
+FResultadoBuscaAEstrela = Frame(root, width=300, height=500, bd=1, relief=SUNKEN)
+FResultadoBuscaAEstrela.grid(row=0, column=2, padx=15)
+
+Label(FResultadoBuscaAEstrela, text='Resultado Busca A*', justify=CENTER).grid(row=0, pady=10, sticky=W)
+
+i=1
+for no in caminho_busca_a_estrela:
+    Label(FResultadoBuscaAEstrela, text=no.getData(), justify=CENTER).grid(row=i, pady=10)
+    i+=1
+
+root.mainloop()

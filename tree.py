@@ -61,7 +61,6 @@ class Tree:
         vet_processo_aberto = [] #eh um vetor de nos
 
         raiz = arvore.getNode(0)
-        #print("Valor raiz: ", raiz.getData())
         vet_processo_aberto.append(raiz)  # Insere a raiz no vetor como primeiro no em aberto.
 
         # Vetor que ira conter os processos em espera, ou seja, aqueles que nao foram selecionados.
@@ -70,25 +69,23 @@ class Tree:
         # As posicoes do vetor remetem ao id do no da arvore, ou seja, na posicao 1 contem o valor da
         # funcao de avaliacao do no de id = 1 da arvore.
         vet_proc_espera = [-1 for i in range(len(arvore.getAllNodes()))]
-        #print(vet_proc_espera)
+
         # Vetor com as distancias para o estado inicial. Cada posicao representa o id do no da arvore,
         # e a informacao desta posicao representa a distancia ate o no raiz.
         vet_dist_estado_inicial = [0 for i in range(len(arvore.getAllNodes()))]
-        #print(vet_dist_estado_inicial)
+
         # Vetor com os nos que ja foram visitados pelo algoritmo, contendo True ou False para visitado ou nao.
         # Cada posicao do vetor remete a um id da arvore
         vet_nos_visitados = [False for i in range(len(arvore.getAllNodes()))]
-        #print(vet_nos_visitados)
 
 
         while True:
             # Primeira posicao do vetor sera o no atual que esta em aberto.
             no_atual = vet_processo_aberto[0]
-            #print(no_atual.getData())
+
             #time.sleep(10)
             # Visitei o no_atual, entao este recebe True
             vet_nos_visitados[no_atual.getId()] = True
-            #print(vet_nos_visitados)
 
             # Se o no_atual for o estado final, entao cheguei no final.
             if no_atual.getData().split('|')[0] == '':
@@ -97,8 +94,7 @@ class Tree:
             # Somo as distancias (pesos) para o estado inicial
             for i in range(len(no_atual.getChildren())):
                 vet_dist_estado_inicial[no_atual.getChildren()[i]] = vet_dist_estado_inicial[no_atual.getId()] + no_atual.getPesosParaOsFilhos()[i]
-                '''print("Vet inicial: ", vet_dist_estado_inicial)
-                time.sleep(3)'''
+
             # Agora iremos procurar a menor funcao de avaliacao (g + h) entre os filhos do no.
             # Comeco selecionando o primeiro filho como ideal
             id_filho_selecionado = no_atual.getChildren()[0]
@@ -108,10 +104,8 @@ class Tree:
             if len(no_atual.getChildren()) > 1:
                 for child in range(len(no_atual.getChildren()) - 1):
                     id_prox_filho = no_atual.getChildren()[child + 1]
-                    print(vet_dist_estado_final)
-                    print(vet_dist_estado_inicial)
-                    time.sleep(5)
                     custo_avaliacao_prox = vet_dist_estado_inicial[id_prox_filho] + vet_dist_estado_final[id_prox_filho]
+
                     if custo_avaliacao_prox < custo_avaliacao:
                         #coloca o filho atual em espera
                         vet_proc_espera[id_filho_selecionado] = custo_avaliacao
@@ -137,8 +131,7 @@ class Tree:
                     menor_custo = vet_proc_espera[i]
                     id_filho_selecionado = i
 
-            #print("Custo selecionado: ", menor_custo)
-            #time.sleep(5)
+
             # Seleciono o no do id_filho_selecionado como proximo no em aberto e insere no comeco.
             vet_processo_aberto.insert(0, arvore.getNode(id_filho_selecionado))
         # end While True
@@ -161,7 +154,7 @@ class Tree:
                     caminho.insert(0, no_atual)
                     break
 
-        return caminho, vet_nos_visitados
+        return caminho
 
 
 
