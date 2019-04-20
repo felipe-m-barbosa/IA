@@ -1,5 +1,4 @@
 from node import Node
-import time
 
 class Tree:
 
@@ -136,7 +135,7 @@ class Tree:
             vet_processo_aberto.insert(0, arvore.getNode(id_filho_selecionado))
         # end While True
 
-        # Agora precisamos reconstruir o caminho para retornar a main.py
+        # Agora precisamos reconstruir o caminho para retornar
         caminho = []
         # O no de posicao 0 neste ponto sera o no de estado final, entao ja colocamos ele no caminho
         caminho.append(vet_processo_aberto[0])
